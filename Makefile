@@ -246,13 +246,13 @@ ECR_DEFAULT_REGIONS = us-east-1
 push-oci-chart:
 	@echo
 	echo "=== login to OCI registry ==="
-	aws ecr-public get-login-password --region ${ECR_DEFAULT_REGION} | helm3.14.0 registry login  --username AWS --password-stdin public.ecr.aws
+	aws ecr-public get-login-password --region us-east-1 | helm3.14.0 registry login  --username AWS --password-stdin public.ecr.aws
 	@echo
 	@echo "=== package OCI chart ==="
 	helm3.14.0 package ${CH_DIR}/${DIR}/ --version ${VERSION}
 	@echo
 	@echo "=== create repository ==="
-	aws ecr-public describe-images --repository-name ${DIR} --region ${ECR_DEFAULT_REGION} || aws ecr-public create-repository --repository-name ${DIR} --region ${ECR_DEFAULT_REGION}
+	aws ecr-public describe-images --repository-name ${DIR} --region us-east-1 || aws ecr-public create-repository --repository-name ${DIR} --region us-east-1
 	@echo
 	@echo "=== push OCI chart ==="
 	helm3.14.0 push ${PACKAGED_CHART} oci://public.ecr.aws/z2k6n2n9
