@@ -34,9 +34,11 @@ spec:
     name: {{ include "superset.fullname" . }}-worker
   minReplicas: {{ .Values.supersetWorker.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.supersetWorker.autoscaling.maxReplicas }}
+  {{- if .Values.supersetWorker.autoscaling.behavior }}
   {{- with .Values.supersetWorker.autoscaling.behavior }}
   behavior:
     {{- toYaml . | nindent 8 }}
+  {{- end }}
   {{- end }}
   metrics:
     {{- if .Values.supersetWorker.autoscaling.targetCPUUtilizationPercentage }}
