@@ -192,8 +192,8 @@ initImage:
 service:
   type: ClusterIP
   port: 8088
-  annotations: {}
-    # cloud.google.com/load-balancer-type: "Internal"
+  annotations:
+    konghq.com/override: timeout-kong-ingress
   loadBalancerIP: ~
   nodePort:
     # -- (int)
