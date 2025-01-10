@@ -38,7 +38,7 @@ from superset.utils.date_parser import (
 from tests.unit_tests.conftest import with_feature_flags
 
 
-def mock_parse_human_datetime(s: str) -> Optional[datetime]:
+def mock_parse_human_datetime(s: str) -> Optional[datetime]:  # noqa: C901
     if s == "now":
         return datetime(2016, 11, 7, 9, 30, 10)
     elif s == "2018":
@@ -65,6 +65,8 @@ def mock_parse_human_datetime(s: str) -> Optional[datetime]:
         return datetime(2000, 1, 1)
     elif s == "2018-01-01T00:00:00":
         return datetime(2018, 1, 1)
+    elif s == "2018-01-10T00:00:00":
+        return datetime(2018, 1, 10)
     elif s == "2018-12-31T23:59:59":
         return datetime(2018, 12, 31, 23, 59, 59)
     elif s == "2022-01-01T00:00:00":
@@ -158,6 +160,26 @@ def test_get_since_until() -> None:
     expected = datetime(2015, 1, 1, 0, 0, 0), datetime(2016, 1, 1, 0, 0, 0)
     assert result == expected
 
+    result = get_since_until("Current day")
+    expected = datetime(2016, 11, 7, 0, 0, 0), datetime(2016, 11, 8, 0, 0, 0)
+    assert result == expected
+
+    result = get_since_until("Current week")
+    expected = datetime(2016, 11, 7, 0, 0, 0), datetime(2016, 11, 14, 0, 0, 0)
+    assert result == expected
+
+    result = get_since_until("Current month")
+    expected = datetime(2016, 11, 1, 0, 0, 0), datetime(2016, 12, 1, 0, 0, 0)
+    assert result == expected
+
+    result = get_since_until("Current quarter")
+    expected = datetime(2016, 10, 1, 0, 0, 0), datetime(2017, 1, 1, 0, 0, 0)
+    assert result == expected
+
+    result = get_since_until("Current year")
+    expected = expected = datetime(2016, 1, 1, 0, 0, 0), datetime(2017, 1, 1, 0, 0, 0)
+    assert result == expected
+
     # Tests for our new instant_time_comparison logic and Feature Flag off
     result = get_since_until(
         time_range="2000-01-01T00:00:00 : 2018-01-01T00:00:00",
@@ -187,7 +209,28 @@ def test_get_since_until() -> None:
     expected = datetime(2000, 1, 1), datetime(2018, 1, 1)
     assert result == expected
 
-    with pytest.raises(ValueError):
+    result = get_since_until(
+        time_range="2000-01-01T00:00:00 : 2018-01-01T00:00:00",
+        time_shift="1 year ago",
+    )
+    expected = datetime(1999, 1, 1), datetime(2017, 1, 1)
+    assert result == expected
+
+    result = get_since_until(
+        time_range="2000-01-01T00:00:00 : 2018-01-01T00:00:00",
+        time_shift="1 month ago",
+    )
+    expected = datetime(1999, 12, 1), datetime(2017, 12, 1)
+    assert result == expected
+
+    result = get_since_until(
+        time_range="2000-01-01T00:00:00 : 2018-01-01T00:00:00",
+        time_shift="1 week ago",
+    )
+    expected = datetime(1999, 12, 25), datetime(2017, 12, 25)
+    assert result == expected
+
+    with pytest.raises(ValueError):  # noqa: PT011
         get_since_until(time_range="tomorrow : yesterday")
 
 
@@ -364,6 +407,36 @@ def test_datetime_eval() -> None:
         "lastday(dateadd(datetime('2018-01-01T00:00:00'), 1, month), month)"
     )
     expected = datetime(2018, 2, 28, 0, 0, 0)
+    assert result == expected
+
+    result = datetime_eval(
+        "datediff(datetime('2018-01-01T00:00:00'), datetime('2018-01-10T00:00:00'))"  # pylint: disable=line-too-long,useless-suppression
+    )
+    assert result == 9
+
+    result = datetime_eval(
+        "datediff(datetime('2018-01-10T00:00:00'), datetime('2018-01-01T00:00:00'))"  # pylint: disable=line-too-long,useless-suppression
+    )
+    assert result == -9
+
+    result = datetime_eval(
+        "datediff(datetime('2018-01-01T00:00:00'), datetime('2018-01-10T00:00:00'), day)"  # pylint: disable=line-too-long,useless-suppression  # noqa: E501
+    )
+    assert result == 9
+
+    result = datetime_eval(
+        "datediff(datetime('2018-01-01T00:00:00'), datetime('2018-01-10T00:00:00'), year)"  # pylint: disable=line-too-long,useless-suppression  # noqa: E501
+    )
+    assert result == 0
+
+    result = datetime_eval(
+        "dateadd("
+        "datetime('2018-01-01T00:00:00'), "
+        "datediff(datetime('2018-01-10T00:00:00'), datetime('2018-01-01T00:00:00')), "  # pylint: disable=line-too-long,useless-suppression
+        "day,"
+        "),"
+    )
+    expected = datetime(2017, 12, 23, 0, 0, 0)
     assert result == expected
 
 

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { Route } from 'react-router-dom';
 import fetchMock from 'fetch-mock';
 import userEvent from '@testing-library/user-event';
@@ -315,6 +314,15 @@ test('Click on Save as dataset', async () => {
     useRouter: true,
   });
   userEvent.click(screen.getByTestId('datasource-menu-trigger'));
+  expect(
+    screen.queryByRole('button', { name: /save/i }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole('button', { name: /close/i }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByText(/select or type dataset name/i),
+  ).not.toBeInTheDocument();
   userEvent.click(screen.getByText('Save as dataset'));
 
   // Renders a save dataset modal
@@ -325,11 +333,11 @@ test('Click on Save as dataset', async () => {
     name: /overwrite existing/i,
   });
   const dropdownField = screen.getByText(/select or type dataset name/i);
-  expect(saveRadioBtn).toBeVisible();
-  expect(overwriteRadioBtn).toBeVisible();
-  expect(screen.getByRole('button', { name: /save/i })).toBeVisible();
-  expect(screen.getByRole('button', { name: /close/i })).toBeVisible();
-  expect(dropdownField).toBeVisible();
+  expect(saveRadioBtn).toBeInTheDocument();
+  expect(overwriteRadioBtn).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
+  expect(dropdownField).toBeInTheDocument();
 });
 
 test('should set the default temporal column', async () => {

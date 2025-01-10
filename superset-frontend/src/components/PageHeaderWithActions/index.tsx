@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { ReactNode, ReactElement } from 'react';
+import { ReactNode, ReactElement } from 'react';
 import { css, SupersetTheme, t, useTheme } from '@superset-ui/core';
 import { AntdDropdown, AntdDropdownProps } from 'src/components';
 import { TooltipPlacement } from 'src/components/Tooltip';
@@ -35,13 +35,16 @@ export const menuTriggerStyles = (theme: SupersetTheme) => css`
   padding: 0;
   border: 1px solid ${theme.colors.primary.dark2};
 
-  &.ant-btn > span.anticon {
+  &.antd5-btn > span.anticon {
     line-height: 0;
     transition: inherit;
   }
 
   &:hover:not(:focus) > span.anticon {
     color: ${theme.colors.primary.light1};
+  }
+  &:focus-visible {
+    outline: 2px solid ${theme.colors.primary.dark2};
   }
 `;
 

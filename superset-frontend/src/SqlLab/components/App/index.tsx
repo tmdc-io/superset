@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 import Mousetrap from 'mousetrap';
@@ -89,11 +89,11 @@ const SqlLabStyles = styled.div`
         }
       }
 
-      .ResultsModal .ant-modal-body {
+      .ResultsModal .antd5-modal-body {
         min-height: ${theme.gridUnit * 140}px;
       }
 
-      .ant-modal-body {
+      .antd5-modal-body {
         overflow: auto;
       }
     }
@@ -111,7 +111,7 @@ interface AppState {
   hash: string;
 }
 
-class App extends React.PureComponent<AppProps, AppState> {
+class App extends PureComponent<AppProps, AppState> {
   hasLoggedLocalStorageUsage: boolean;
 
   constructor(props: AppProps) {

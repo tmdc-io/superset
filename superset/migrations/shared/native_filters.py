@@ -14,7 +14,6 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-import json
 from collections import defaultdict
 from textwrap import dedent
 from typing import Any
@@ -23,10 +22,11 @@ from shortid import ShortId
 
 from superset.models.dashboard import Dashboard
 from superset.models.slice import Slice
+from superset.utils import json
 from superset.utils.dashboard_filter_scopes_converter import convert_filter_scopes
 
 
-def convert_filter_scopes_to_native_filters(  # pylint: disable=invalid-name,too-many-branches,too-many-locals,too-many-nested-blocks,too-many-statements
+def convert_filter_scopes_to_native_filters(  # pylint: disable=invalid-name,too-many-branches,too-many-locals,too-many-nested-blocks,too-many-statements  # noqa: C901
     json_metadata: dict[str, Any],
     position_json: dict[str, Any],
     filter_boxes: list[Slice],
@@ -274,7 +274,7 @@ def convert_filter_scopes_to_native_filters(  # pylint: disable=invalid-name,too
     )
 
 
-def migrate_dashboard(dashboard: Dashboard) -> None:
+def migrate_dashboard(dashboard: Dashboard) -> None:  # noqa: C901
     """
     Convert the dashboard to use native filters.
 

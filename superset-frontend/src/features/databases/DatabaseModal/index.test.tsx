@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+
+// TODO: These tests should be made atomic in separate files
+
 import fetchMock from 'fetch-mock';
 import userEvent from '@testing-library/user-event';
 import {
@@ -413,7 +415,7 @@ describe('DatabaseModal', () => {
       ];
 
       visibleComponents.forEach(component => {
-        expect(component).toBeVisible();
+        expect(component).toBeInTheDocument();
       });
       // there should be a footer but it should not have any buttons in it
       expect(footer[0]).toBeEmptyDOMElement();
@@ -431,9 +433,12 @@ describe('DatabaseModal', () => {
       // ---------- Components ----------
       // <TabHeader> - AntD header
       const closeButton = screen.getByRole('button', { name: /close/i });
+
       const basicHeader = screen.getByRole('heading', {
         name: /connect a database/i,
       });
+      expect(basicHeader).toBeInTheDocument();
+
       // <ModalHeader> - Connection header
       const basicHelper = screen.getByText(/step 2 of 2/i);
       const basicHeaderTitle = screen.getByText(/enter primary credentials/i);
@@ -493,7 +498,6 @@ describe('DatabaseModal', () => {
       // ---------- Assertions ----------
       const visibleComponents = [
         closeButton,
-        basicHeader,
         basicHelper,
         basicHeaderTitle,
         basicHeaderSubtitle,
@@ -521,7 +525,7 @@ describe('DatabaseModal', () => {
       ];
 
       visibleComponents.forEach(component => {
-        expect(component).toBeVisible();
+        expect(component).toBeInTheDocument();
       });
     });
 
@@ -620,7 +624,7 @@ describe('DatabaseModal', () => {
       ];
 
       visibleComponents.forEach(component => {
-        expect(component).toBeVisible();
+        expect(component).toBeInTheDocument();
       });
     });
 
@@ -696,9 +700,9 @@ describe('DatabaseModal', () => {
         /force all tables and views to be created in this schema when clicking ctas or cvas in sql lab\./i,
       );
       const allowDMLCheckbox = screen.getByRole('checkbox', {
-        name: /allow dml/i,
+        name: /allow ddl and dml/i,
       });
-      const allowDMLText = screen.getByText(/allow dml/i);
+      const allowDMLText = screen.getByText(/allow ddl and dml/i);
       const enableQueryCostEstimationCheckbox = screen.getByRole('checkbox', {
         name: /enable query cost estimation/i,
       });
@@ -777,7 +781,7 @@ describe('DatabaseModal', () => {
         enableRowExpansionCheckbox,
       ];
       visibleComponents.forEach(component => {
-        expect(component).toBeVisible();
+        expect(component).toBeInTheDocument();
       });
       invisibleComponents.forEach(component => {
         expect(component).not.toBeVisible();
@@ -845,7 +849,7 @@ describe('DatabaseModal', () => {
       ];
 
       visibleComponents.forEach(component => {
-        expect(component).toBeVisible();
+        expect(component).toBeInTheDocument();
       });
     });
 
@@ -925,7 +929,7 @@ describe('DatabaseModal', () => {
 
       // ---------- Assertions ----------
       visibleComponents.forEach(component => {
-        expect(component).toBeVisible();
+        expect(component).toBeInTheDocument();
       });
       invisibleComponents.forEach(component => {
         expect(component).not.toBeVisible();
@@ -1011,7 +1015,7 @@ describe('DatabaseModal', () => {
 
       // ---------- Assertions ----------
       visibleComponents.forEach(component => {
-        expect(component).toBeVisible();
+        expect(component).toBeInTheDocument();
       });
       invisibleComponents.forEach(component => {
         expect(component).not.toBeVisible();
@@ -1116,7 +1120,7 @@ describe('DatabaseModal', () => {
       // Dynamic form has 3 steps, seeing this text means the dynamic form is present
       const dynamicFormStepText = screen.getByText(/step 2 of 3/i);
 
-      expect(dynamicFormStepText).toBeVisible();
+      expect(dynamicFormStepText).toBeInTheDocument();
 
       // ---------- SQL Alchemy example (2-step form)
       // Click the back button to go back to step 1,
@@ -1133,7 +1137,7 @@ describe('DatabaseModal', () => {
       expect(await screen.findByText(/step 2 of 2/i)).toBeInTheDocument();
       const sqlAlchemyFormStepText = screen.getByText(/step 2 of 2/i);
 
-      expect(sqlAlchemyFormStepText).toBeVisible();
+      expect(sqlAlchemyFormStepText).toBeInTheDocument();
     });
 
     describe('SQL Alchemy form flow', () => {
@@ -1227,9 +1231,9 @@ describe('DatabaseModal', () => {
           const SSHTunnelServerPortInput = screen.getByTestId(
             'ssh-tunnel-server_port-input',
           );
-          expect(SSHTunnelServerPortInput).toHaveValue('');
+          expect(SSHTunnelServerPortInput).toHaveValue(null);
           userEvent.type(SSHTunnelServerPortInput, '22');
-          expect(SSHTunnelServerPortInput).toHaveValue('22');
+          expect(SSHTunnelServerPortInput).toHaveValue(22);
           const SSHTunnelUsernameInput = screen.getByTestId(
             'ssh-tunnel-username-input',
           );
@@ -1263,9 +1267,9 @@ describe('DatabaseModal', () => {
           const SSHTunnelServerPortInput = screen.getByTestId(
             'ssh-tunnel-server_port-input',
           );
-          expect(SSHTunnelServerPortInput).toHaveValue('');
+          expect(SSHTunnelServerPortInput).toHaveValue(null);
           userEvent.type(SSHTunnelServerPortInput, '22');
-          expect(SSHTunnelServerPortInput).toHaveValue('22');
+          expect(SSHTunnelServerPortInput).toHaveValue(22);
           const SSHTunnelUsernameInput = screen.getByTestId(
             'ssh-tunnel-username-input',
           );
@@ -1289,7 +1293,7 @@ describe('DatabaseModal', () => {
 
           expect(await screen.findByText(/step 2 of 2/i)).toBeInTheDocument();
           const SSHTunnelingToggle = screen.getByTestId('ssh-tunnel-switch');
-          expect(SSHTunnelingToggle).toBeVisible();
+          expect(SSHTunnelingToggle).toBeInTheDocument();
           const SSHTunnelServerAddressInput = screen.queryByTestId(
             'ssh-tunnel-server_address-input',
           );
@@ -1321,26 +1325,26 @@ describe('DatabaseModal', () => {
           const SSHTunnelUsePasswordInput = screen.getByTestId(
             'ssh-tunnel-use_password-radio',
           );
-          expect(SSHTunnelUsePasswordInput).toBeVisible();
+          expect(SSHTunnelUsePasswordInput).toBeInTheDocument();
           const SSHTunnelUsePrivateKeyInput = screen.getByTestId(
             'ssh-tunnel-use_private_key-radio',
           );
-          expect(SSHTunnelUsePrivateKeyInput).toBeVisible();
+          expect(SSHTunnelUsePrivateKeyInput).toBeInTheDocument();
           const SSHTunnelPasswordInput = screen.getByTestId(
             'ssh-tunnel-password-input',
           );
           // By default, we use Password as login method
-          expect(SSHTunnelPasswordInput).toBeVisible();
+          expect(SSHTunnelPasswordInput).toBeInTheDocument();
           // Change the login method to use private key
           userEvent.click(SSHTunnelUsePrivateKeyInput);
           const SSHTunnelPrivateKeyInput = screen.getByTestId(
             'ssh-tunnel-private_key-input',
           );
-          expect(SSHTunnelPrivateKeyInput).toBeVisible();
+          expect(SSHTunnelPrivateKeyInput).toBeInTheDocument();
           const SSHTunnelPrivateKeyPasswordInput = screen.getByTestId(
             'ssh-tunnel-private_key_password-input',
           );
-          expect(SSHTunnelPrivateKeyPasswordInput).toBeVisible();
+          expect(SSHTunnelPrivateKeyPasswordInput).toBeInTheDocument();
         });
       });
     });
@@ -1405,7 +1409,9 @@ describe('DatabaseModal', () => {
         const importDbButton = screen.getByTestId(
           'import-database-btn',
         ) as HTMLInputElement;
-        expect(importDbButton).toBeVisible();
+        importDbButton.type = 'file';
+        importDbButton.files = {} as FileList;
+        expect(importDbButton).toBeInTheDocument();
 
         const testFile = new File([new ArrayBuffer(1)], 'model_export.zip');
 
@@ -1436,7 +1442,7 @@ describe('DatabaseModal', () => {
 
     test('enters step 2 of 3 when proper database is selected', () => {
       const step2of3text = screen.getByText(/step 2 of 3/i);
-      expect(step2of3text).toBeVisible();
+      expect(step2of3text).toBeInTheDocument();
     });
   });
 
@@ -1462,7 +1468,7 @@ describe('DatabaseModal', () => {
 
     it('enters step 2 of 2 when proper database is selected', () => {
       const step2of2text = screen.getByText(/step 2 of 2/i);
-      expect(step2of2text).toBeVisible();
+      expect(step2of2text).toBeInTheDocument();
     });
 
     it('renders the "Advanced" - SECURITY tab without Allow File Upload Checkbox', async () => {
@@ -1496,7 +1502,7 @@ describe('DatabaseModal', () => {
 
       // ---------- Assertions ----------
       visibleComponents.forEach(component => {
-        expect(component).toBeVisible();
+        expect(component).toBeInTheDocument();
       });
       invisibleComponents.forEach(component => {
         expect(component).not.toBeVisible();
@@ -1550,8 +1556,8 @@ describe('DatabaseModal', () => {
     test('Error displays when it is an object', async () => {
       const step2of3text = screen.getByText(/step 2 of 3/i);
       const errorSection = screen.getByText(/Database Creation Error/i);
-      expect(step2of3text).toBeVisible();
-      expect(errorSection).toBeVisible();
+      expect(step2of3text).toBeInTheDocument();
+      expect(errorSection).toBeInTheDocument();
     });
   });
 
@@ -1598,11 +1604,11 @@ describe('DatabaseModal', () => {
       const button = screen.getByText('See more');
       userEvent.click(button);
       const errorMessage = screen.getByText(/Test Error With String/i);
-      expect(errorMessage).toBeVisible();
+      expect(errorMessage).toBeInTheDocument();
       const closeButton = screen.getByText('Close');
       userEvent.click(closeButton);
-      expect(step2of3text).toBeVisible();
-      expect(errorTitleMessage).toBeVisible();
+      expect(step2of3text).toBeInTheDocument();
+      expect(errorTitleMessage).toBeInTheDocument();
     });
   });
 
@@ -1716,6 +1722,20 @@ describe('dbReducer', () => {
     expect(currentState).toEqual({
       ...databaseFixture,
       extra: '{"foo":"bar"}',
+    });
+  });
+
+  test('it will set state to payload from encrypted extra input change', () => {
+    const action: DBReducerActionType = {
+      type: ActionType.EncryptedExtraInputChange,
+      payload: { name: 'foo', value: 'bar' },
+    };
+    const currentState = dbReducer(databaseFixture, action);
+
+    // extra should be serialized
+    expect(currentState).toEqual({
+      ...databaseFixture,
+      masked_encrypted_extra: '{"foo":"bar"}',
     });
   });
 

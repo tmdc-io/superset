@@ -16,10 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
 import { render } from 'spec/helpers/testing-library';
 import SouthPane from 'src/SqlLab/components/SouthPane';
-import '@testing-library/jest-dom/extend-expect';
+import '@testing-library/jest-dom';
 import { STATUS_OPTIONS } from 'src/SqlLab/constants';
 import { initialState, table, defaultQueryEditor } from 'src/SqlLab/fixtures';
 import { denormalizeTimestamp } from '@superset-ui/core';
@@ -121,6 +120,19 @@ test('should render offline when the state is offline', async () => {
   });
 
   expect(getByText(STATUS_OPTIONS.offline)).toBeVisible();
+});
+
+test('should render empty result state when latestQuery is empty', () => {
+  const { getAllByRole } = render(
+    <SouthPane {...mockedProps} latestQueryId={undefined} />,
+    {
+      useRedux: true,
+      initialState: mockState,
+    },
+  );
+
+  const resultPanel = getAllByRole('tabpanel')[0];
+  expect(resultPanel).toHaveTextContent('Run a query to display results');
 });
 
 test('should render tabs for table preview queries', () => {

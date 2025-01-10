@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import React from 'react';
 import {
   SuperChart,
   ChartDataProvider,
@@ -89,9 +88,6 @@ export default function createQueryStory({
         </VerifyCORS>
       </div>
     );
-  };
-  story.parameters = {
-    chromatic: { disable: true },
   };
   story.args = {
     host: 'localhost:8088',

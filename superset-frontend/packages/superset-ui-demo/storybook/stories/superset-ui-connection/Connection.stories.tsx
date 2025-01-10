@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { bigNumberFormData } from '../../../../superset-ui-core/test/chart/fixtures/formData';
 
 import VerifyCORS, {
@@ -40,7 +39,7 @@ export default {
   ],
 };
 
-export const configureCORS = ({
+export const ConfigureCORS = ({
   host,
   selectEndpoint,
   customEndpoint,
@@ -84,18 +83,14 @@ export const configureCORS = ({
     </div>
   );
 };
-
-configureCORS.parameters = {
-  chromatic: { disable: true },
-};
-configureCORS.args = {
+ConfigureCORS.args = {
   host: 'localhost:8088',
   selectEndpoint: '/api/v1/chart/data',
   customEndpoint: '',
   methodOption: 'POST', // TODO disable when custonEndpoint and selectEndpoint are empty
   postPayloadContents: JSON.stringify({ form_data: bigNumberFormData }),
 };
-configureCORS.argTypes = {
+ConfigureCORS.argTypes = {
   host: {
     control: 'text',
     description: 'Set Superset App host for CORS request',
@@ -122,4 +117,4 @@ configureCORS.argTypes = {
     description: 'Set POST payload contents',
   },
 };
-configureCORS.storyName = 'Verify CORS';
+ConfigureCORS.storyName = 'Verify CORS';

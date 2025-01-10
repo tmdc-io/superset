@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useCallback, useContext, useMemo } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   BinaryQueryObjectFilterClause,
@@ -118,7 +118,7 @@ export default function DrillDetailModal({
       show={showModal}
       onHide={onHideModal ?? (() => null)}
       css={css`
-        .ant-modal-body {
+        .antd5-modal-body {
           display: flex;
           flex-direction: column;
         }

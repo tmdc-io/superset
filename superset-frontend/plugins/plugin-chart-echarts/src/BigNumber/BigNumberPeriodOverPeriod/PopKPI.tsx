@@ -16,32 +16,51 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { createRef, useMemo } from 'react';
-import { css, styled, t, useTheme } from '@superset-ui/core';
-import { Tooltip } from '@superset-ui/chart-controls';
+import { useEffect, useMemo, useState } from 'react';
 import {
+  css,
+  ensureIsArray,
+  fetchTimeRange,
+  getTimeOffset,
+  styled,
+  t,
+  useTheme,
+} from '@superset-ui/core';
+import { DEFAULT_DATE_PATTERN, Tooltip } from '@superset-ui/chart-controls';
+import { isEmpty } from 'lodash';
+import {
+  ColorSchemeEnum,
   PopKPIComparisonSymbolStyleProps,
   PopKPIComparisonValueStyleProps,
   PopKPIProps,
 } from './types';
+import { useOverflowDetection } from './useOverflowDetection';
+
+const NumbersContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  overflow: auto;
+`;
 
 const ComparisonValue = styled.div<PopKPIComparisonValueStyleProps>`
   ${({ theme, subheaderFontSize }) => `
     font-weight: ${theme.typography.weights.light};
-    width: 33%;
-    display: table-cell;
+    display: flex;
+    justify-content: center;
     font-size: ${subheaderFontSize || 20}px;
-    text-align: center;
+    flex: 1 1 0px;
   `}
 `;
 
-const SymbolWrapper = styled.div<PopKPIComparisonSymbolStyleProps>`
+const SymbolWrapper = styled.span<PopKPIComparisonSymbolStyleProps>`
   ${({ theme, backgroundColor, textColor }) => `
     background-color: ${backgroundColor};
     color: ${textColor};
     padding: ${theme.gridUnit}px ${theme.gridUnit * 2}px;
     border-radius: ${theme.gridUnit * 2}px;
-    display: inline-block;
     margin-right: ${theme.gridUnit}px;
   `}
 `;
@@ -57,34 +76,83 @@ export default function PopKPI(props: PopKPIProps) {
     headerFontSize,
     subheaderFontSize,
     comparisonColorEnabled,
+    comparisonColorScheme,
     percentDifferenceNumber,
-    comparatorText,
+    currentTimeRangeFilter,
+    startDateOffset,
+    shift,
+    dashboardTimeRange,
   } = props;
 
-  const rootElem = createRef<HTMLDivElement>();
-  const theme = useTheme();
+  const [comparisonRange, setComparisonRange] = useState<string>('');
 
+  useEffect(() => {
+    if (!currentTimeRangeFilter || (!shift && !startDateOffset)) {
+      setComparisonRange('');
+    } else if (!isEmpty(shift) || startDateOffset) {
+      const promise: any = fetchTimeRange(
+        dashboardTimeRange ?? (currentTimeRangeFilter as any).comparator,
+        currentTimeRangeFilter.subject,
+      );
+      Promise.resolve(promise).then((res: any) => {
+        const dates = res?.value?.match(DEFAULT_DATE_PATTERN);
+        const [parsedStartDate, parsedEndDate] = dates ?? [];
+        const newShift = getTimeOffset({
+          timeRangeFilter: {
+            ...currentTimeRangeFilter,
+            comparator: `${parsedStartDate} : ${parsedEndDate}`,
+          },
+          shifts: ensureIsArray(shift),
+          startDate: startDateOffset || '',
+        });
+        fetchTimeRange(
+          dashboardTimeRange ?? (currentTimeRangeFilter as any).comparator,
+          currentTimeRangeFilter.subject,
+          ensureIsArray(newShift),
+        ).then(res => {
+          const response: string[] = ensureIsArray(res.value);
+          const firstRange: string = response.flat()[0];
+          const rangeText = firstRange.split('vs\n');
+          setComparisonRange(
+            rangeText.length > 1 ? rangeText[1].trim() : rangeText[0],
+          );
+        });
+      });
+    }
+  }, [currentTimeRangeFilter, shift, startDateOffset, dashboardTimeRange]);
+
+  const theme = useTheme();
+  const flexGap = theme.gridUnit * 5;
   const wrapperDivStyles = css`
     font-family: ${theme.typography.families.sansSerif};
-    position: relative;
     display: flex;
-    flex-direction: column;
     justify-content: center;
-    padding: ${theme.gridUnit * 4}px;
-    border-radius: ${theme.gridUnit * 2}px;
+    align-items: center;
     height: ${height}px;
     width: ${width}px;
+    overflow: auto;
   `;
 
   const bigValueContainerStyles = css`
     font-size: ${headerFontSize || 60}px;
     font-weight: ${theme.typography.weights.normal};
     text-align: center;
+    margin-bottom: ${theme.gridUnit * 4}px;
   `;
 
   const getArrowIndicatorColor = () => {
-    if (!comparisonColorEnabled) return theme.colors.grayscale.base;
-    return percentDifferenceNumber > 0
+    if (!comparisonColorEnabled || percentDifferenceNumber === 0) {
+      return theme.colors.grayscale.base;
+    }
+
+    if (percentDifferenceNumber > 0) {
+      // Positive difference
+      return comparisonColorScheme === ColorSchemeEnum.Green
+        ? theme.colors.success.base
+        : theme.colors.error.base;
+    }
+    // Negative difference
+    return comparisonColorScheme === ColorSchemeEnum.Red
       ? theme.colors.success.base
       : theme.colors.error.base;
   };
@@ -99,30 +167,39 @@ export default function PopKPI(props: PopKPIProps) {
   const { backgroundColor, textColor } = useMemo(() => {
     let bgColor = defaultBackgroundColor;
     let txtColor = defaultTextColor;
-    if (percentDifferenceNumber > 0) {
-      if (comparisonColorEnabled) {
-        bgColor = theme.colors.success.light2;
-        txtColor = theme.colors.success.base;
-      }
-    } else if (percentDifferenceNumber < 0) {
-      if (comparisonColorEnabled) {
-        bgColor = theme.colors.error.light2;
-        txtColor = theme.colors.error.base;
-      }
+    if (comparisonColorEnabled && percentDifferenceNumber !== 0) {
+      const useSuccess =
+        (percentDifferenceNumber > 0 &&
+          comparisonColorScheme === ColorSchemeEnum.Green) ||
+        (percentDifferenceNumber < 0 &&
+          comparisonColorScheme === ColorSchemeEnum.Red);
+
+      // Set background and text colors based on the conditions
+      bgColor = useSuccess
+        ? theme.colors.success.light2
+        : theme.colors.error.light2;
+      txtColor = useSuccess
+        ? theme.colors.success.base
+        : theme.colors.error.base;
     }
 
     return {
       backgroundColor: bgColor,
       textColor: txtColor,
     };
-  }, [theme, comparisonColorEnabled, percentDifferenceNumber]);
+  }, [
+    theme,
+    comparisonColorScheme,
+    comparisonColorEnabled,
+    percentDifferenceNumber,
+  ]);
 
   const SYMBOLS_WITH_VALUES = useMemo(
     () => [
       {
         symbol: '#',
         value: prevNumber,
-        tooltipText: t('Data for %s', comparatorText),
+        tooltipText: t('Data for %s', comparisonRange || 'previous range'),
       },
       {
         symbol: '△',
@@ -135,29 +212,59 @@ export default function PopKPI(props: PopKPIProps) {
         tooltipText: t('Percentage difference between the time periods'),
       },
     ],
-    [prevNumber, valueDifference, percentDifferenceFormattedString],
+    [
+      comparisonRange,
+      prevNumber,
+      valueDifference,
+      percentDifferenceFormattedString,
+    ],
   );
 
+  const { isOverflowing, symbolContainerRef, wrapperRef } =
+    useOverflowDetection(flexGap);
+
   return (
-    <div ref={rootElem} css={wrapperDivStyles}>
-      <div css={bigValueContainerStyles}>
-        {bigNumber}
-        {percentDifferenceNumber !== 0 && (
-          <span css={arrowIndicatorStyle}>
-            {percentDifferenceNumber > 0 ? '↑' : '↓'}
-          </span>
-        )}
-      </div>
-      <div
-        css={css`
-          width: 100%;
-          display: table;
-        `}
+    <div css={wrapperDivStyles} ref={wrapperRef}>
+      <NumbersContainer
+        css={
+          isOverflowing &&
+          css`
+            width: fit-content;
+            margin: auto;
+            align-items: flex-start;
+          `
+        }
       >
+        <div css={bigValueContainerStyles}>
+          {bigNumber}
+          {percentDifferenceNumber !== 0 && (
+            <span css={arrowIndicatorStyle}>
+              {percentDifferenceNumber > 0 ? '↑' : '↓'}
+            </span>
+          )}
+        </div>
+
         <div
-          css={css`
-            display: table-row;
-          `}
+          css={[
+            css`
+              display: flex;
+              justify-content: space-around;
+              gap: ${flexGap}px;
+              min-width: 0;
+              flex-shrink: 1;
+            `,
+            isOverflowing
+              ? css`
+                  flex-direction: column;
+                  align-items: flex-start;
+                  width: fit-content;
+                `
+              : css`
+                  align-items: center;
+                  width: 100%;
+                `,
+          ]}
+          ref={symbolContainerRef}
         >
           {SYMBOLS_WITH_VALUES.map((symbol_with_value, index) => (
             <ComparisonValue
@@ -182,7 +289,7 @@ export default function PopKPI(props: PopKPIProps) {
             </ComparisonValue>
           ))}
         </div>
-      </div>
+      </NumbersContainer>
     </div>
   );
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, ReactNode } from 'react';
 import {
   useFilters,
   usePagination,
@@ -187,8 +187,8 @@ interface UseListViewConfig {
   initialFilters?: Filter[];
   bulkSelectColumnConfig?: {
     id: string;
-    Header: (conf: any) => React.ReactNode;
-    Cell: (conf: any) => React.ReactNode;
+    Header: (conf: any) => ReactNode;
+    Cell: (conf: any) => ReactNode;
   };
   renderCard?: boolean;
   defaultViewMode?: ViewModeType;
@@ -220,7 +220,7 @@ export function useListViewState({
       query.sortColumn && query.sortOrder
         ? [{ id: query.sortColumn, desc: query.sortOrder === 'desc' }]
         : initialSort,
-    [query.sortColumn, query.sortOrder],
+    [initialSort, query.sortColumn, query.sortOrder],
   );
 
   const initialState = {
@@ -238,7 +238,7 @@ export function useListViewState({
   );
 
   const columnsWithSelect = useMemo(() => {
-    // add exact filter type so filters with falsey values are not filtered out
+    // add exact filter type so filters with falsy values are not filtered out
     const columnsWithFilter = columns.map(f => ({ ...f, filter: 'exact' }));
     return bulkSelectMode
       ? [bulkSelectColumnConfig, ...columnsWithFilter]
@@ -256,6 +256,7 @@ export function useListViewState({
     pageCount,
     gotoPage,
     setAllFilters,
+    setSortBy,
     selectedFlatRows,
     toggleAllRowsSelected,
     state: { pageIndex, pageSize, sortBy, filters },
@@ -373,6 +374,7 @@ export function useListViewState({
     rows,
     selectedFlatRows,
     setAllFilters,
+    setSortBy,
     state: { pageIndex, pageSize, sortBy, filters, internalFilters, viewMode },
     toggleAllRowsSelected,
     applyFilterValue,

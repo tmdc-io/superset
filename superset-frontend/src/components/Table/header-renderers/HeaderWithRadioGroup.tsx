@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { css, useTheme } from '@superset-ui/core';
 import { Radio } from 'src/components/Radio';
-import { Space } from 'src/components';
+import { Space } from 'src/components/Space';
 import Icons from 'src/components/Icons';
 import Popover from 'src/components/Popover';
 
