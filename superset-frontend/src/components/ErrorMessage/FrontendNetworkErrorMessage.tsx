@@ -16,20 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export function BottomRightResizeHandle() {
-  return <div className="resize-handle resize-handle--bottom-right" />;
-}
+import { t } from '@superset-ui/core';
 
-export function RightResizeHandle() {
-  return <div className="resize-handle resize-handle--right" />;
-}
+import { ErrorMessageComponentProps } from './types';
+import ErrorAlert from './ErrorAlert';
 
-export function BottomResizeHandle() {
-  return <div className="resize-handle resize-handle--bottom" />;
+function FrontendNetworkErrorMessage({
+  error,
+  subtitle,
+}: ErrorMessageComponentProps) {
+  const { level, message } = error;
+  return (
+    <ErrorAlert errorType={t('Network Error')} message={message} type={level} />
+  );
 }
-
-export default {
-  right: RightResizeHandle,
-  bottom: BottomResizeHandle,
-  bottomRight: BottomRightResizeHandle,
-};
+export default FrontendNetworkErrorMessage;
