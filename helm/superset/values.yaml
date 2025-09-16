@@ -222,7 +222,7 @@ ingress:
   pathType: ImplementationSpecific
   hosts:
     - chart-example.local
-  tls: []
+  tls: chart-example.local
   extraHostsRaw: []
   #  - secretName: chart-example-tls
   #    hosts:
